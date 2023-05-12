@@ -42,11 +42,3 @@ print('User db %d acts' % len(userdb))
 ```python
 explore_impacts(USER_DB, EI_DB, climate)
 ```
-
-```python
-
-```
-
-```python
-
-```
