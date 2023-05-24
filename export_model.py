@@ -14,6 +14,9 @@ MODELS = \
     "complete_system" : "complete life cycle assessment model of a fixed or floating wind farm",
     "per_kwh": "Full system per kWh electricity produced"}
 
+AXES = [None, "system_1"] # "phase" not working yet
+
+
 agb.loadParams()
 
 USER_DB="lif-owi"
@@ -86,8 +89,18 @@ impacts_EF_3_0 = {impact[2]: impact for impact in [climate_tot, climate_bio, cli
 
 impacts_EF_CO2 = {climate_tot[2]:climate_tot}
 
-
-
+FUNCTIONAL_UNITS = {
+    "energy" : dict(
+        formula = load_rate*availability*8760*turbine_MW*1000*n_turbines*life_time,
+        unit="kWh"),
+    "installed_power" : dict(
+        formula = turbine_MW * n_turbines,
+        unit="MW"
+    ),
+    "system" : dict(
+        formula = 1,
+        unit=None)
+}
 
 def export():
 
@@ -96,11 +109,9 @@ def export():
     agb.loadParams()
     model = export_lca(
         system=models["complete_system"],
-        functional_units={
-            "system":1,
-            "per_turbine":1/n_turbines},
+        functional_units=FUNCTIONAL_UNITS,
         methods_dict=impacts_EF_3_0,
-        axis="system_1")
+        axes=AXES)
 
     js = serialize_model(model)
 
@@ -114,12 +125,13 @@ def import_model():
 
 if __name__ == '__main__':
 
-    #export()
+    export()
     model = import_model()
 
     val = model.evaluate(
         impact = list(impacts_EF_3_0.keys())[0],
         functional_unit="system",
+        axis="total",
         n_turbines=3)
 
     print(val)
