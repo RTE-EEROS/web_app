@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from lib.export import Model
+from lib.common import Model
 import json, sys
 
 from lib.utils import timer
@@ -29,7 +29,7 @@ if __name__ == '__main__':
             for impact in ["global warming potential (GWP100)"]:
 
                 # Loop on functional unit
-                for fu in ["energy", "installed_power", "system"] :
+                for fu in ["energy", "power", "system"] :
 
                     val, unit = model.evaluate(
                         impact = impact,

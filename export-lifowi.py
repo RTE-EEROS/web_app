@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import lca_algebraic as agb
-from lib.export import export_lca, serialize_model, Model
+from lib.export import export_lca
+from lib.common import Model, serialize_model
 import json
 
 OUTFILE = "model.json"
@@ -89,7 +90,7 @@ def export():
         "energy": dict(
             quantity=load_rate * availability * 8760 * turbine_MW * 1000 * n_turbines * life_time,
             unit="kWh"),
-        "installed_power": dict(
+        "power": dict(
             quantity=turbine_MW * n_turbines,
             unit="MW"
         ),
