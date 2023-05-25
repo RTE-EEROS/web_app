@@ -1,25 +1,13 @@
-from lca_algebraic.params import _param_registry
-import bw2io
-import brightway2 as bw
+#!/usr/bin/env python
 import lca_algebraic as agb
-from lca_algebraic.export import export_lca, serialize_model, Model
+from lib.export import export_lca, serialize_model, Model
 import json
 
-agb.initProject("Parameterized_model_OWF_Original")
-
-OUTFILE= "model.json"
-
-MODELS = \
-    {"per_mw" : 'complete life cycle assessment model of a fixed or floating wind farm per MW',
-    "complete_system" : "complete life cycle assessment model of a fixed or floating wind farm",
-    "per_kwh": "Full system per kWh electricity produced"}
-
+OUTFILE = "model.json"
+PROJECT_NAME = "Parameterized_model_OWF_Original"
+USER_DB = "lif-owi"
+SYSTEM = "complete life cycle assessment model of a fixed or floating wind farm"
 AXES = [None, "system_1"] # "phase" not working yet
-
-
-agb.loadParams()
-
-USER_DB="lif-owi"
 
 LCIA_method = 'EF v3.0'
 
@@ -89,26 +77,29 @@ impacts_EF_3_0 = {impact[2]: impact for impact in [climate_tot, climate_bio, cli
 
 impacts_EF_CO2 = {climate_tot[2]:climate_tot}
 
-FUNCTIONAL_UNITS = {
-    "energy" : dict(
-        formula = load_rate*availability*8760*turbine_MW*1000*n_turbines*life_time,
-        unit="kWh"),
-    "installed_power" : dict(
-        formula = turbine_MW * n_turbines,
-        unit="MW"
-    ),
-    "system" : dict(
-        formula = 1,
-        unit=None)
-}
 
 def export():
 
-    models = {key: agb.findActivity(code=code, db_name=USER_DB) for key, code in MODELS.items()}
-
+    agb.initProject(PROJECT_NAME)
     agb.loadParams()
+
+    system = agb.findActivity(code=SYSTEM, db_name=USER_DB)
+
+    FUNCTIONAL_UNITS = {
+        "energy": dict(
+            quantity=load_rate * availability * 8760 * turbine_MW * 1000 * n_turbines * life_time,
+            unit="kWh"),
+        "installed_power": dict(
+            quantity=turbine_MW * n_turbines,
+            unit="MW"
+        ),
+        "system": dict(
+            quantity=1,
+            unit=None)
+    }
+
     model = export_lca(
-        system=models["complete_system"],
+        system=system,
         functional_units=FUNCTIONAL_UNITS,
         methods_dict=impacts_EF_3_0,
         axes=AXES)
@@ -118,23 +109,9 @@ def export():
     with open(OUTFILE, "w") as f:
         json.dump(js, f, indent=4)
 
-def import_model():
-    with open(OUTFILE, "r") as f:
-        js = json.load(f)
-        return Model.from_json(js)
-
 if __name__ == '__main__':
-
     export()
-    model = import_model()
 
-    val = model.evaluate(
-        impact = list(impacts_EF_3_0.keys())[0],
-        functional_unit="system",
-        axis="total",
-        n_turbines=3)
-
-    print(val)
 
 
 

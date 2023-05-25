@@ -1,22 +1,44 @@
 #!/usr/bin/env python
-from lca_algebraic.export import export_lca, serialize_model, Model
+from lib.export import Model
 import json, sys
 
-INPUT_FILE=sys.argv[1]
+from lib.utils import timer
+
+INPUT_FILE="model.json"
+
+def pretty_print(val) :
+    if isinstance(val, dict) :
+        val = json.dumps(val, indent=4)
+    print(val)
 
 if __name__ == '__main__':
 
-    with open(INPUT_FILE, "r") as f:
-        js = json.load(f)
-        model = Model.from_json(js)
+    # Loading model is long : it should be done only once and kept in memory
+    with timer("loading model"):
+        with open(INPUT_FILE, "r") as f:
+            js = json.load(f)
+            model = Model.from_json(js)
 
-    val = model.evaluate(
-        impact = "global warming potential (GWP100)",
-        functional_unit="system",
-        axis="system_1",
-        n_turbines=3)
+    # Evaluation is fast
+    with timer("eval model"):
 
-    print(val)
+        # Loop on axes
+        for axis in ["total", "system_1"] :
+
+            # Loop on impacts
+            for impact in ["global warming potential (GWP100)"]:
+
+                # Loop on functional unit
+                for fu in ["energy", "installed_power", "system"] :
+
+                    val, unit = model.evaluate(
+                        impact = impact,
+                        functional_unit=fu,
+                        axis=axis)
+
+                    print("Result for axis:[%s], impact:[%s], functional unit:[%s], unit:[%s]" % (axis, impact, fu, unit))
+                    pretty_print(val)
+                    print()
 
 
 
