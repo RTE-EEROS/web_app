@@ -1,10 +1,14 @@
 #!/usr/bin/env python
+import os
+import sys
+
+# Add current dir to PATH
+sys.path.insert(0, os.getcwd())
+
+
 import lca_algebraic as agb
 from lib.export import export_lca
-from lib.common import Model, serialize_model
-import json
-
-from settings import IMPACTS, AXES, OUTFILE
+from lib.settings import IMPACTS, AXES, OUTFILE
 
 PROJECT_NAME = "Parameterized_model_OWF_Original"
 USER_DB = "lif-owi"

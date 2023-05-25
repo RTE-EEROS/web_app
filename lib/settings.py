@@ -1,4 +1,4 @@
-# Settings common to both export and import
+# Settings common to both export and import, for lifowi
 
 OUTFILE = "model.json"
 

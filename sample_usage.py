@@ -3,7 +3,7 @@ from lib.common import Model
 import json, sys
 
 from lib.utils import timer
-from settings import OUTFILE, AXES, IMPACTS
+from lib.settings import OUTFILE, AXES, IMPACTS
 
 
 def pretty_print(val) :

@@ -4,6 +4,7 @@ import json
 
 TEMPLATE="readme.jinja.md"
 MODEL="model.json"
+OUT="README.md"
 
 environment = Environment(loader=FileSystemLoader("res/"))
 template = environment.get_template(TEMPLATE)
@@ -19,6 +20,6 @@ for param in model["params"].values() :
         param["range"] = "[%.15g, %.15g]" % (param["min"], param["max"])
 
 
-res = template.render(model=model)
-
-print(res)
+with open(OUT, "w") as out :
+    res = template.render(model=model)
+    out.write(res)
