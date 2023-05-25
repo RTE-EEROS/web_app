@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Dict
 from sympy import Expr, Float, parse_expr, lambdify
+import json
 
 class ParamType(str, Enum) :
     BOOLEAN = "bool"
@@ -104,8 +105,9 @@ class Lambda:
 
 class Param :
 
-    def __init__(self, name, type, unit, default, values=None, min=None, max=None, description=None):
+    def __init__(self, name, type, unit, default, values=None, min=None, max=None, description=None, label=None):
         self.name = name
+        self.label = label
         self.type = type
         self.default = default
         self.unit = unit
@@ -193,7 +195,7 @@ class Model :
         """
 
         if not axis in self.expressions :
-            raise Exception("Wrong axis '%s'. Expected one of %s" % (axis, list(self.impacts.keys())))
+            raise Exception("Wrong axis '%s'. Expected one of %s" % (axis, list(self.expressions.keys())))
 
         expressions_by_impact = self.expressions[axis]
 
@@ -245,6 +247,22 @@ class Model :
         impacts = {key: Impact(impact["name"], impact["unit"]) for key, impact in js["impacts"].items()}
 
         return cls(all_params, expressions, functional_units, impacts)
+
+    def to_file(self, filename):
+
+        js = serialize_model(self)
+
+        with open(filename, "w") as f:
+            json.dump(js, f, indent=4)
+
+    @classmethod
+    def from_file(cls, filename):
+
+        with open(filename, "r") as f:
+            js = json.load(f)
+            return Model.from_json(js)
+
+
 
 
 def serialize_model(obj) :

@@ -3,8 +3,8 @@ from lib.common import Model
 import json, sys
 
 from lib.utils import timer
+from settings import OUTFILE, AXES, IMPACTS
 
-INPUT_FILE="model.json"
 
 def pretty_print(val) :
     if isinstance(val, dict) :
@@ -15,18 +15,19 @@ if __name__ == '__main__':
 
     # Loading model is long : it should be done only once and kept in memory
     with timer("loading model"):
-        with open(INPUT_FILE, "r") as f:
-            js = json.load(f)
-            model = Model.from_json(js)
+        model = Model.from_file(OUTFILE)
 
     # Evaluation is fast
     with timer("eval model"):
 
         # Loop on axes
-        for axis in ["total", "system_1"] :
+        for axis in AXES :
+
+            if axis is None :
+                axis = "total"
 
             # Loop on impacts
-            for impact in ["global warming potential (GWP100)"]:
+            for impact in IMPACTS.keys():
 
                 # Loop on functional unit
                 for fu in ["energy", "power", "system"] :
