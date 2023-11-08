@@ -45,18 +45,23 @@ class Lambda:
 
             # Transform them into list of params
             self.params = unexpand_param_names(all_params, all_expanded_params)
+            reexpanded_params = expand_param_names(all_params, self.params)
 
             # Lambdify with all expanded params
             for key, sub_expr in expr.items():
-                self.lambd[key] = _lambdify(sub_expr, all_expanded_params)
+                self.lambd[key] = _lambdify(sub_expr, reexpanded_params)
 
         else:
             if not isinstance(expr, Expr):
                 expr = Float(expr)
 
             expanded_params = list(str(symbol) for symbol in expr.free_symbols)
-            self.lambd = _lambdify(expr, expanded_params)
             self.params = unexpand_param_names(all_params, expanded_params)
+
+            # Reexpend symbols, to ensure all enum values are present as a parameter
+            reexpanded_params = expand_param_names(all_params, self.params)
+
+            self.lambd = _lambdify(expr, reexpanded_params)
 
         self.expr = expr
 

@@ -2,7 +2,7 @@
 
 OUTFILE = "model.json"
 
-AXES = [None, "system_1"] # "phase" not working yet
+AXES = [None, "system_1", "phase"]
 
 LCIA_method = 'EF v3.0'
 

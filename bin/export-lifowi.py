@@ -12,7 +12,7 @@ from lib.settings import IMPACTS, AXES, OUTFILE
 
 PROJECT_NAME = "Parameterized_model_OWF_Original"
 USER_DB = "lif-owi"
-SYSTEM = "complete life cycle assessment model of a fixed or floating wind farm"
+SYSTEM = 'complete life cycle assessment model of a wind farm '
 
 def export():
 
