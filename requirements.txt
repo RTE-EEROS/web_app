@@ -9,3 +9,5 @@ bw2io==0.8.8
 bw2parameters==0.7
 lca_algebraic
 plotly
+pydantic
+pydantic-yaml

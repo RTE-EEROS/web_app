@@ -1,0 +1,27 @@
+project: Parameterized_model_OWF_Original
+database: lif-owi
+root_activity: 'complete life cycle assessment model of a wind farm '
+
+impacts:
+  climate_change: ['EF v3.0','climate change','global warming potential (GWP100)']
+  particules: ['EF v3.0','particulate matter formation','impact on human health']
+  mineral_depletion: ['EF v3.0','material resources: metals/minerals','abiotic depletion potential (ADP): elements (ultimate reserves)']
+  acidification: ['EF v3.0','acidification','accumulated exceedance (ae)']
+  toxicity_non_carcinogenic: ['EF v3.0','human toxicity: non-carcinogenic','comparative toxic unit for human (CTUh) ']
+  toxicity_carcinogenic: ['EF v3.0','human toxicity: carcinogenic','comparative toxic unit for human (CTUh) ']
+  land_use: ['EF v3.0', 'land use', 'soil quality index']
+
+functional_units:
+    energy:
+        formula: load_rate * availability * 8760 * turbine_MW * 1000 * n_turbines * life_time
+        unit: kWh
+
+    power:
+        formula: turbine_MW * n_turbines
+        unit: MW
+
+    system:
+        formula: 1
+        unit:
+
+axes: ["system_1", "phase"]

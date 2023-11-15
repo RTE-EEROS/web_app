@@ -4,14 +4,13 @@ import streamlit as st
 from lib.common import Model
 from lib.app_utils import group_params, select_dict
 
-from lib.settings import OUTFILE, AXES, IMPACTS
+from lib.settings import settings, OUTFILE
 import plotly.express as px
 
-IN_FILE = "model.json"
 
 @st.cache_resource()
 def load_model():
-    return Model.from_file(IN_FILE)
+    return Model.from_file(OUTFILE)
 
 model = load_model()
 
@@ -30,8 +29,7 @@ with st.sidebar:
 
     param_groups = group_params(model.params.values())
 
-    print(param_groups)
-
+    # Gather param values by name
     param_values = dict()
 
     first_group = True
@@ -73,9 +71,6 @@ with st.sidebar:
                         max_value=float(param.max),
                         value=param.default)
 
-
-
-
 # Read header from 'static/header.md'
 with open("static/header.md", "r") as f:
     st.markdown(f.read())
@@ -88,13 +83,14 @@ val, unit = model.evaluate(
                         axis="total",
                         **param_values)
 
-
+# Total impacts
 st.subheader("Total")
 st.markdown("Total impact for *%s* by functional unit *%s*" % (impact, functional_unit))
 
 st.metric(label=impact, value="%.3g [%s]" % (val, unit))
 
-for axis in AXES:
+# Impact by axes
+for axis in settings.axes:
     if axis is None :
         continue
 
@@ -108,6 +104,7 @@ for axis in AXES:
         **param_values)
 
     # Cleanup
+    res = dict(sorted(res.items()))
     for key in [None, "null"] :
         if key in res:
             del res[key]

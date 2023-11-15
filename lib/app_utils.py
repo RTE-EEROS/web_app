@@ -9,7 +9,7 @@ def group_params(params) :
         groups[param.group].append(param)
     return groups
 
-def select_dict(label, options:Union[Dict|List], default=None, **kwargs) :
+def select_dict(label, options:Union[Dict, List], default=None, **kwargs) :
     """Select box taking dict of key=>label as option"""
 
     if isinstance(options, list):
