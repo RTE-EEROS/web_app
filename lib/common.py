@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Dict
 from sympy import Expr, Float, parse_expr, lambdify
 import json
+from typing import Literal, List
 
 class ParamType(str, Enum) :
     BOOLEAN = "bool"
@@ -108,15 +109,23 @@ class Lambda:
         return cls(expr=expr, all_params=all_params)
 
 
-class Param :
+class Param:
 
-    def __init__(self, name, type, unit, default, values=None, min=None, max=None, description=None, label=None):
-        self.name = name
-        self.label = label
-        self.type = type
-        self.default = default
-        self.unit = unit
-        self.description = description
+    def __init__(
+            self, name, type:ParamType, unit:str, default:float,
+            values:List[str]=None,
+            min:float=None, max:float=None,
+            description:str=None,
+            label:str=None,
+            group:str=None):
+
+        self.name: str = name
+        self.label: str = label
+        self.type: ParamType = type
+        self.default: Float  = default
+        self.unit: str = unit
+        self.group : str = group
+        self.description: str = description
         if values:
             self.values = values
         else:
@@ -182,10 +191,10 @@ class Model :
         :param functional_units: Dict of function unit name => formula
         :param impacts : Dict of impacts with their units
         """
-        self.params = params
-        self.expressions = expressions
-        self.functional_units = functional_units
-        self.impacts = impacts
+        self.params : Dict[str, Param] = params
+        self.expressions : Dict[str, Dict[str, Lambda]]= expressions
+        self.functional_units : Dict[str, FunctionalUnit] = functional_units
+        self.impacts: Dict[str, Impact] = impacts
 
     def __json__(self):
         return self.__dict__

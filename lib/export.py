@@ -22,6 +22,7 @@ def paramDef_to_param(paramDef:ParamDef):
         default=paramDef.default,
         label=paramDef.label,
         values=getattr(paramDef, "values", None),
+        group=paramDef.group,
         min=paramDef.min,
         max=paramDef.max,
         description=paramDef.description)
