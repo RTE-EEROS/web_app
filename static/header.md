@@ -1,8 +1,8 @@
-# This is a header description
+## Example introduction
 
-Update the description in `./static/header.md`
+This is a default text. Update the description in `./static/header.md`
 
-Example of integration of an image in `./static`
+Example of integration of an image in `./static/img`
 
 ![this is a logo](./app/static/img/example_logo.png)
 

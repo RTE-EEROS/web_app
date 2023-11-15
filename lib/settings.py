@@ -18,6 +18,11 @@ class FunctionalUnit :
 @dataclass
 class Settings :
 
+    title: str
+    """Web page title """
+
+
+
     project : str
     """Project name"""
 
@@ -36,6 +41,8 @@ class Settings :
     axes: List[str] = Field(default_factory=lambda: [])
     """Optional list of axes (Total by default) """
 
+    icon: Optional[str] = None
+    """Favicon (unicode emoji) """
 
 settings:Settings = parse_yaml_file_as(Settings, SETTINGS_FILE)
 

@@ -7,6 +7,10 @@ from lib.app_utils import group_params, select_dict
 from lib.settings import settings, OUTFILE
 import plotly.express as px
 
+st.set_page_config(
+    page_title=settings.title,
+    page_icon=settings.icon)
+st.title(settings.title)
 
 @st.cache_resource()
 def load_model():
@@ -14,7 +18,20 @@ def load_model():
 
 model = load_model()
 
+CSS = """
+label p {
+    font-weight: bold !important;
+}
+
+[data-testid=stTickBar] {
+    visibility:hidden;
+}
+"""
+
+st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
+
 with st.sidebar:
+
 
     st.header('Settings')
 
@@ -42,11 +59,15 @@ with st.sidebar:
 
             for param in params:
 
+                param_label = param.name
+                if param.unit :
+                    param_label += " [%s]" % param.unit
+
                 if param.type == "bool" :
 
                     param_values[param.name] = st.checkbox(
                         key=param.name,
-                        label=param.name,
+                        label=param_label,
                         help=param.label,
                         value=param.default)
 
@@ -55,7 +76,7 @@ with st.sidebar:
                     default_index = param.values.index(param.default) if param.default in param.values else None
 
                     param_values[param.name] = st.selectbox(
-                        label=param.name,
+                        label=param_label,
                         help=param.label,
                         key=param.name,
                         options=param.values,
@@ -65,7 +86,7 @@ with st.sidebar:
 
                     param_values[param.name] = st.slider(
                         key=param.name,
-                        label=param.name,
+                        label=param_label,
                         help=param.label,
                         min_value=float(param.min),
                         max_value=float(param.max),
