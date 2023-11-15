@@ -1,0 +1,7 @@
+label p {
+    font-weight: bold !important;
+}
+
+[data-testid=stTickBar] {
+    visibility:hidden;
+}

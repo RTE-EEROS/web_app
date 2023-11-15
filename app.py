@@ -7,31 +7,30 @@ from lib.app_utils import group_params, select_dict
 from lib.settings import settings, OUTFILE
 import plotly.express as px
 
-st.set_page_config(
-    page_title=settings.title,
-    page_icon=settings.icon)
-st.title(settings.title)
+CSS_FILE = "static/style.css"
 
-@st.cache_resource()
-def load_model():
-    return Model.from_file(OUTFILE)
+def init_app():
 
-model = load_model()
+    st.set_page_config(
+        page_title=settings.title,
+        page_icon=settings.icon)
+    st.title(settings.title)
 
-CSS = """
-label p {
-    font-weight: bold !important;
-}
+    @st.cache_resource()
+    def load_model():
+        return Model.from_file(OUTFILE)
 
-[data-testid=stTickBar] {
-    visibility:hidden;
-}
-"""
+    # Load CSS within page
+    with open(CSS_FILE, 'r') as f:
+        css = f.read()
+        st.markdown(
+            f"<style>{css}</style>",
+            unsafe_allow_html=True)
 
-st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
+    # Load model once
+    return load_model()
 
-with st.sidebar:
-
+def display_settings(model):
 
     st.header('Settings')
 
@@ -41,6 +40,11 @@ with st.sidebar:
     # Selection of functional units
     fu_options = {key: "%s %s" % (key, "[%s]" % fu.unit if fu.unit else "") for key, fu in model.functional_units.items()}
     functional_unit = select_dict("Functional unit", options=fu_options)
+
+    return impact, functional_unit
+
+def display_params(model):
+    """ Display params and return current values """
 
     st.header("Parameters")
 
@@ -91,58 +95,81 @@ with st.sidebar:
                         min_value=float(param.min),
                         max_value=float(param.max),
                         value=param.default)
-
-# Read header from 'static/header.md'
-with open("static/header.md", "r") as f:
-    st.markdown(f.read())
-
-st.header("📊 Results")
-
-val, unit = model.evaluate(
-                        impact = impact,
-                        functional_unit=functional_unit,
-                        axis="total",
-                        **param_values)
-
-# Total impacts
-st.subheader("Total")
-st.markdown("Total impact for *%s* by functional unit *%s*" % (impact, functional_unit))
-
-st.metric(label=impact, value="%.3g [%s]" % (val, unit))
-
-# Impact by axes
-for axis in settings.axes:
-    if axis is None :
-        continue
-
-    st.subheader("Axis : %s" % axis)
-
-    st.markdown("Impact for *%s* by functional unit *%s*, splitted by *%s*" % (impact, functional_unit, axis))
-    res, unit = model.evaluate(
-        impact=impact,
-        functional_unit=functional_unit,
-        axis=axis,
-        **param_values)
-
-    # Cleanup
-    res = dict(sorted(res.items()))
-    for key in [None, "null"] :
-        if key in res:
-            del res[key]
-
-    # Prepare for plotly
-    data = dict(
-        key=list(res.keys()),
-        val=list(res.values()))
-
-    st.plotly_chart(px.bar(
-        data,
-        x="key",
-        y="val",
-        labels=dict(
-            key=axis,
-            val="%s [%s]" % (impact, unit)
-        )))
+    return param_values
 
 
+def display_header():
+    # Read header from 'static/header.md'
+    with open("static/header.md", "r") as f:
+        st.markdown(f.read())
+
+def display_results(model, impact, functional_unit, param_values):
+
+    st.header("📊 Results")
+
+    val, unit = model.evaluate(
+            impact = impact,
+            functional_unit=functional_unit,
+            axis="total",
+            **param_values)
+
+    # Total impacts
+    st.subheader("Total")
+    st.markdown("Total impact for *%s* by functional unit *%s*" % (impact, functional_unit))
+
+    st.metric(label=impact, value="%.3g [%s]" % (val, unit))
+
+    # Impact by axes
+    for axis in settings.axes:
+        if axis is None :
+            continue
+
+        st.subheader("Axis : %s" % axis)
+
+        st.markdown("Impact for *%s* by functional unit *%s*, splitted by *%s*" % (impact, functional_unit, axis))
+        res, unit = model.evaluate(
+            impact=impact,
+            functional_unit=functional_unit,
+            axis=axis,
+            **param_values)
+
+        # Cleanup
+        res = dict(sorted(res.items()))
+        for key in [None, "null"] :
+            if key in res:
+                del res[key]
+
+        # Prepare for plotly
+        data = dict(
+            key=list(res.keys()),
+            val=list(res.values()))
+
+        # Display chart
+        st.plotly_chart(px.bar(
+            data,
+            x="key",
+            y="val",
+            labels=dict(
+                key=axis,
+                val="%s [%s]" % (impact, unit)
+            )))
+
+
+
+def main():
+
+    model = init_app()
+
+    with st.sidebar:
+
+        impact, functional_unit = display_settings(model)
+
+        param_values = display_params(model)
+
+    display_header()
+
+    display_results(model, impact, functional_unit, param_values)
+
+
+main()
 
