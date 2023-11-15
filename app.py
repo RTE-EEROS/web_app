@@ -2,7 +2,10 @@
 
 import streamlit as st
 from lib.common import Model
+from lib.app_utils import group_params, select_dict
 
+from lib.settings import OUTFILE, AXES, IMPACTS
+import plotly.express as px
 
 IN_FILE = "model.json"
 
@@ -16,43 +19,59 @@ with st.sidebar:
 
     st.header('Settings')
 
-    st.selectbox("Impact category", options=model.impacts.values())
+    # Selection of impact
+    impact = select_dict("Impact category", options=list(model.impacts.keys()))
+
+    # Selection of functional units
+    fu_options = {key: "%s %s" % (key, "[%s]" % fu.unit if fu.unit else "") for key, fu in model.functional_units.items()}
+    functional_unit = select_dict("Functional unit", options=fu_options)
 
     st.header("Parameters")
 
+    param_groups = group_params(model.params.values())
+
+    print(param_groups)
+
     param_values = dict()
-    for key, param in model.params.items():
 
-        #st.text(param.name, help=param.label)
+    first_group = True
+    for group_name, params in param_groups.items():
 
-        if param.type == "bool" :
+        expander = st.expander(group_name, expanded=first_group) if group_name else None
+        first_group = False
 
-            param_values[key] = st.checkbox(
-                key=param.name,
-                label=param.name,
-                help=param.label,
-                value=param.default)
+        with expander :
 
-        elif param.type == "enum" :
+            for param in params:
 
-            default_index = param.values.index(param.default) if param.default in param.values else None
+                if param.type == "bool" :
 
-            param_values[key] = st.selectbox(
-                label=param.name,
-                help=param.label,
-                key=param.name,
-                options=param.values,
-                index=default_index)
+                    param_values[param.name] = st.checkbox(
+                        key=param.name,
+                        label=param.name,
+                        help=param.label,
+                        value=param.default)
 
-        else:
+                elif param.type == "enum" :
 
-            param_values[key] = st.slider(
-                key=param.name,
-                label=param.name,
-                help=param.label,
-                min_value=float(param.min),
-                max_value=float(param.max),
-                value=param.default)
+                    default_index = param.values.index(param.default) if param.default in param.values else None
+
+                    param_values[param.name] = st.selectbox(
+                        label=param.name,
+                        help=param.label,
+                        key=param.name,
+                        options=param.values,
+                        index=default_index)
+
+                else:
+
+                    param_values[param.name] = st.slider(
+                        key=param.name,
+                        label=param.name,
+                        help=param.label,
+                        min_value=float(param.min),
+                        max_value=float(param.max),
+                        value=param.default)
 
 
 
@@ -61,12 +80,51 @@ with st.sidebar:
 with open("static/header.md", "r") as f:
     st.markdown(f.read())
 
-st.header("Results")
-st.metric(label="CO2", value="12 gCO2/kWh")
+st.header("📊 Results")
 
-st.json(param_values)
+val, unit = model.evaluate(
+                        impact = impact,
+                        functional_unit=functional_unit,
+                        axis="total",
+                        **param_values)
 
 
+st.subheader("Total")
+st.markdown("Total impact for *%s* by functional unit *%s*" % (impact, functional_unit))
+
+st.metric(label=impact, value="%.3g [%s]" % (val, unit))
+
+for axis in AXES:
+    if axis is None :
+        continue
+
+    st.subheader("Axis : %s" % axis)
+
+    st.markdown("Impact for *%s* by functional unit *%s*, splitted by *%s*" % (impact, functional_unit, axis))
+    res, unit = model.evaluate(
+        impact=impact,
+        functional_unit=functional_unit,
+        axis=axis,
+        **param_values)
+
+    # Cleanup
+    for key in [None, "null"] :
+        if key in res:
+            del res[key]
+
+    # Prepare for plotly
+    data = dict(
+        key=list(res.keys()),
+        val=list(res.values()))
+
+    st.plotly_chart(px.bar(
+        data,
+        x="key",
+        y="val",
+        labels=dict(
+            key=axis,
+            val="%s [%s]" % (impact, unit)
+        )))
 
 
 
