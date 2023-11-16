@@ -34,8 +34,8 @@ def init_app():
         def get(self):
             self.write({'message': 'hello world'})
 
-    setup_api_handler('/api/hello', HelloHandler)
-
+    setup_api_handler('/app/static/hello', HelloHandler)
+    setup_api_handler('/hello', HelloHandler)
 
     # Load model once
     return load_model()
