@@ -6,6 +6,8 @@ from lib.app_utils import group_params, select_dict
 
 from lib.settings import settings, OUTFILE
 import plotly.express as px
+from tornado.web import RequestHandler
+from lib.api import setup_api_handler
 
 CSS_FILE = "static/style.css"
 
@@ -26,6 +28,14 @@ def init_app():
         st.markdown(
             f"<style>{css}</style>",
             unsafe_allow_html=True)
+
+    # Setup API
+    class HelloHandler(RequestHandler):
+        def get(self):
+            self.write({'message': 'hello world'})
+
+    setup_api_handler('/api/hello', HelloHandler)
+
 
     # Load model once
     return load_model()
