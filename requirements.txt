@@ -46,7 +46,6 @@ jsonschema==4.20.0
 jsonschema-specifications==2023.11.1
 jupyterlab-widgets==3.0.9
 kiwisolver==1.4.5
-lca-algebraic==1.0.5
 lca-algebraic-dev==1.0.5.1531401.dev0
 lxml==4.9.3
 markdown-it-py==3.0.0
