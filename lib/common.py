@@ -226,6 +226,8 @@ class Model :
         # Compute value of impacts
         impacts = lambd.evaluate(self.params, param_values)
 
+        # Filter out "null"=zero axis
+
         unit = impact_obj.unit
 
         if functional_unit.unit is not None :
@@ -233,6 +235,10 @@ class Model :
 
         # Divide the two
         if isinstance(impacts, dict) :
+
+            # Filter out "null"=zero axis
+            impacts = {key:val for key, val in impacts.items() if not (key == "null" and val == 0.0)}
+
             vals = {key: val / fu_val for key, val in impacts.items()}
         else:
             vals = impacts / fu_val
