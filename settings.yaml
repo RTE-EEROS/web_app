@@ -15,7 +15,7 @@ impacts:
 
 functional_units:
     energy:
-        formula: load_rate * availability * 8760 * turbine_MW * 1000 * n_turbines * life_time
+        formula: 8760000*availability*life_time*load_rate*n_turbines*turbine_MW*(1 - elec_losses)
         unit: kWh
 
     power:
