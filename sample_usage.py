@@ -3,7 +3,7 @@ from lib.common import Model
 import json, sys
 
 from lib.utils import timer
-from lib.settings import OUTFILE, AXES, IMPACTS
+from lib.settings import settings, OUTFILE
 
 
 def pretty_print(val) :
@@ -21,13 +21,13 @@ if __name__ == '__main__':
     with timer("eval model"):
 
         # Loop on axes
-        for axis in AXES :
+        for axis in settings.axes :
 
             if axis is None :
                 axis = "total"
 
             # Loop on impacts
-            for impact in IMPACTS.keys():
+            for impact in settings.impacts.keys():
 
                 # Loop on functional unit
                 for fu in ["energy", "power", "system"] :

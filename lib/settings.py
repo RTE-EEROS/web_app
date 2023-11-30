@@ -8,8 +8,6 @@ import json
 OUTFILE = "data/model.json"
 SETTINGS_FILE = "settings.yaml"
 
-AXES = ["system_1", "phase"]
-
 @dataclass
 class FunctionalUnit :
     formula: Union[str, int, float] = "1"
