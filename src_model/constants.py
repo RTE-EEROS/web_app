@@ -18,7 +18,7 @@ WT_FOUNDATIONS="wind turbines foundations"
 INT_CABLES="inter-array cables"
 SUBSTATION="offshore substation"
 EXP_CABLES="export cables"
-WT_WTFOUNDATIONS_INTCABLES="wind turbines + foundations ¨+ inter-array cables"
+WT_WTFOUNDATIONS_INTCABLES="wind turbines + foundations + inter-array cables"
 
 #system_2 / Wind Turbine
 TOWER="tower"

@@ -386,6 +386,31 @@ plt.plot(P, mass_tot_wind_turbine_off, label='Sacchi 2019 offshore model')
 plt.legend()
 plt.show()
 
+# ## Scaling factor
+
+turbine_MW_min=5
+turbine_MW_max=15
+
+mass_per_MW_min=rotor_mass_t_power_MW_2(turbine_MW_min)/turbine_MW_min
+mass_per_MW_max=rotor_mass_t_power_MW_2(turbine_MW_max)/turbine_MW_max
+scale_factor=mass_per_MW_max/mass_per_MW_min
+print(format(scale_factor, '.2f'))  
+
+mass_per_MW_min=nacelle_mass_t_power_MW_2(turbine_MW_min)/turbine_MW_min
+mass_per_MW_max=nacelle_mass_t_power_MW_2(turbine_MW_max)/turbine_MW_max
+scale_factor=mass_per_MW_max/mass_per_MW_min
+print(format(scale_factor, '.2f'))  
+
+mass_per_MW_min=tower_mass_t_power_MW_2(turbine_MW_min)/turbine_MW_min
+mass_per_MW_max=tower_mass_t_power_MW_2(turbine_MW_max)/turbine_MW_max
+scale_factor=mass_per_MW_max/mass_per_MW_min
+print(format(scale_factor, '.2f'))  
+
+mass_per_MW_min=wind_turbine_mass_t_power_MW_2(turbine_MW_min)/turbine_MW_min
+mass_per_MW_max=wind_turbine_mass_t_power_MW_2(turbine_MW_max)/turbine_MW_max
+scale_factor=mass_per_MW_max/mass_per_MW_min
+print(format(scale_factor, '.2f'))  
+
 # # Value table
 
 # +

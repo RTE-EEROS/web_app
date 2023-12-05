@@ -59,12 +59,12 @@ availability = agb.newFloatParam(
 # +
 elec_losses = agb.newFloatParam(
     'elec_losses',
-    default = 0.008+0.009, min = 0.002, max = 0.02,
+    default = 0.003+0.006+0.001, min = 0.002, max = 0.02,
     group="1. Global wind farm",
     label ='ratio of electricity losses between the production (wind turbines) and the landfall junction')
 
 # Default value taken from 
-# 1. wind expert formula for interarray cables
+# 1. wind experts for interarray cables
 # 2. RTE Study considering the losses of the offshore substation (transformers) and export cables for a 600 MW farm with an AC connexion with 30 km of cables
 # See report for more explanations
 
@@ -81,7 +81,7 @@ load_rate = agb.newFloatParam(
 foundations_type = agb.newEnumParam(
     "foundations_type", 
     group = '1. Global wind farm',
-    default="monopod",
+    default="jacket",
     values=["gbf", "monopod", "tripod", "jacket", "floatingspar", "semisub","custom"], 
     label = 'the type of foundations. Warning : water depth and foundation type are correlated')
 
@@ -159,7 +159,7 @@ d_manufacturingsite_onshoresite_ship = agb.newFloatParam(
 #Parameter for installation stage  
 d_shore = agb.newFloatParam(
     "d_shore",
-    default = 30, min=5, max=50,
+    default = 20, min=5, max=50,
     group = '2. Transport, installation, O&M, decomissioning',
     label = 'The distance between the port (onshore area) and the windturbines in the sea (offshore area)',
     unit = "km")

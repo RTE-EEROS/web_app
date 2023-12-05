@@ -145,6 +145,16 @@ plt.show()
 
 correlation_coefficient(power,jacket_mass_per_length)
 
+# # Scaling factor
+
+turbine_MW_min=5
+turbine_MW_max=15
+
+mass_per_MW_min=jacket_mass_per_length_tperm_power_MW(turbine_MW_min)/turbine_MW_min
+mass_per_MW_max=jacket_mass_per_length_tperm_power_MW(turbine_MW_max)/turbine_MW_max
+scale_factor=mass_per_MW_max/mass_per_MW_min
+print(format(scale_factor, '.2f'))  
+
 # +
 #Fit the power and rotor diameter based on the input data (excel file)
 normalized_jacket_mass_per_length_power_MW=polynomial_fit(power, normalized_jacket_mass_per_length_per_power, 1)

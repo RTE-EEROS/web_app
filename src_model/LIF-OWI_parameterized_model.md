@@ -100,12 +100,7 @@ from background_flows import import_background
 from background_flows import print_background
 from background_flows import USER_DB
 
-#Import mass model - Sacchi 2019
-from sympy import exp #import exp function from sympy as lca_algebraic calculations run with sympy
-from mass_extrapolation_functions import nacelle_weight_kg_power_MW, rotor_weight_kg_power_MW, tower_weight_kg_power_MW, total_wind_turbine_weight_kg_power_MW
-from mass_extrapolation_functions import p_rotor_power_OFF,p_height_power_OFF,p_nacelle_weight_power_OFF,p_rotor_weight_rotor_diameter_OFF,p_tower_weight_d2h
-
-#Import rotor diameter model - own model
+#Import wind turbines and rotor diameter model 
 from mass_extrapolation_functions import rotor_diameter_m_power_MW_2,tower_mass_t_power_MW_2,three_blades_mass_t_power_MW_2,nacelle_with_hub_mass_t_power_MW_2,wind_turbine_mass_t_power_MW_2
 from mass_extrapolation_functions import jacket_mass_per_length_tperm_power_MW
 ```
@@ -482,29 +477,16 @@ elec_prod_lifetime_kWh=(load_rate*availability*(1-elec_losses)*8760*turbine_MW*1
 #*1000 to convert from MW to kW
 ```
 
-## Wind turbine's mass model = f(turbine_MW)
-Using formula provided either by Sacchi et al. 2019 either by a simple model based on online collected data, we calculate rotor diameter, tower height, mass of rotor, mass of nacelle and mass of tower of a wind turbine based on its power capacity. The formulas are imported from the file:  wind_turbine_mass_extrapolation_function.py. The mass model are printed in the file : visualisation_wind_turbine_extrapolation_sacchi_own_model.py <br> 
-The calculated masses can then be used or not by the model (section 7.1). 
+## Wind turbine's rotor diameter and mass model = f(turbine_MW)
+Using formula provided by an implemented model based on online collected data, we calculate rotor diameter, mass of rotor, mass of nacelle and mass of tower of a wind turbine based on its power capacity. The formulas are imported from the file:  mass_extrapolation_function.py. The mass model are printed in the file : visualisation_wind_turbine_extrapolation.py <br> 
+The calculated masses can then be used or not by the model depending on the model of use (section 7.1). 
 
 ```python
-#Choose the mass_model you want to use
-mass_model="model based on online collected data"
-#mass_model="sacchi 2019"
-```
-
-```python
-#Automatic attribution of mass 
-if mass_model=="model based on online collected data":
-    mass_nacelle_calc_kg=nacelle_with_hub_mass_t_power_MW_2(turbine_MW)
-    mass_rotor_calc_kg=three_blades_mass_t_power_MW_2(turbine_MW)
-    mass_tower_calc_kg=tower_mass_t_power_MW_2(turbine_MW)
-    mass_wind_turbine_tot_calc_kg=wind_turbine_mass_t_power_MW_2(turbine_MW)
-    
-if mass_model=="sacchi 2019":
-    mass_nacelle_calc_kg=nacelle_weight_kg_power_MW(turbine_MW,*p_nacelle_weight_power_OFF)
-    mass_rotor_calc_kg=rotor_weight_kg_power_MW(turbine_MW,*p_rotor_power_OFF,*p_rotor_weight_rotor_diameter_OFF)
-    mass_tower_calc_kg=tower_weight_kg_power_MW(turbine_MW, *p_rotor_power_OFF, *p_height_power_OFF, *p_tower_weight_d2h)
-    mass_wind_turbine_tot_calc_kg=total_wind_turbine_weight_kg_power_MW(turbine_MW, *p_rotor_power_OFF, *p_height_power_OFF, *p_nacelle_weight_power_OFF, *p_rotor_weight_rotor_diameter_OFF, *p_tower_weight_d2h)
+rotor_diameter_calc_m=rotor_diameter_m_power_MW_2(turbine_MW)
+mass_nacelle_calc_kg=nacelle_with_hub_mass_t_power_MW_2(turbine_MW)*1000
+mass_rotor_calc_kg=three_blades_mass_t_power_MW_2(turbine_MW)*1000
+mass_tower_calc_kg=tower_mass_t_power_MW_2(turbine_MW)*1000
+mass_wind_turbine_tot_calc_kg=wind_turbine_mass_t_power_MW_2(turbine_MW)*1000
 ```
 
 ```python
@@ -512,16 +494,7 @@ values_table(
     mass_nacelle_calc_kg=(mass_nacelle_calc_kg, "kg"),
     mass_rotor_calc_kg=(mass_rotor_calc_kg, "kg"),
     mass_tower_calc_kg=(mass_tower_calc_kg, "kg"))
-```
 
-## Wind turbines rotor diameter model = f(turbine_MW)
-The rotor diameter extrapolation is not taken from Sacchi 2019 as the calculated diameter is not relevant for wind turbine with a capacity up to 10 MW. It is taken from our own fit model.
-
-```python
-rotor_diameter_calc_m=rotor_diameter_m_power_MW_2(turbine_MW)
-```
-
-```python
 values_table(
     rotor_diameter_calc_m=(rotor_diameter_calc_m, "m"))
 ```
@@ -531,7 +504,6 @@ values_table(
 ```python
 #Mass of jacket per meter is generated with online collected data
 lineic_mass_foundations_jacket_calc_kg_per_m=jacket_mass_per_length_tperm_power_MW(turbine_MW)*1000 #kg
-
 ```
 
 ## Semi-submersible foundations mass model = f(turbine_MW)
@@ -626,7 +598,7 @@ agb.exploreImpacts(impacts_EF_CO2[0], tower_manufacturing_ref)
 ```
 
 ####  2️⃣ 3️⃣ 4️⃣ Resizing masses
- 1️⃣ wind_turbine_inventory = "sacchi_mass_model" > If you only know the power capacity of the turbine, you have nothing to do, the masses are calculated based on Sacchi's mass model
+ 1️⃣ wind_turbine_inventory = "mass_model" > If you only know the power capacity of the turbine, you have nothing to do, the masses are calculated based on an implemented mass model
  
  2️⃣ wind_turbine_inventory = "user_mass_model" > If you know the aggregated masses of tower/rotor/nacelle, you can enter their values (or formula to calculate them)
  
@@ -637,7 +609,7 @@ agb.exploreImpacts(impacts_EF_CO2[0], tower_manufacturing_ref)
 ```python
 #Delete the # at the beginning of the line corresponding to the chosen level and put an # in front of the other lines
 
-tower_wind_turbine_inventory = "sacchi_mass_model"           #level 1
+tower_wind_turbine_inventory = "mass_model"           #level 1
 #tower_wind_turbine_inventory = "user_mass_model"            #level 2
 #tower_wind_turbine_inventory = "bill_of_materials"          #Level 3
 #tower_wind_turbine_inventory = "custom"                     #Level 4
@@ -646,7 +618,7 @@ tower_wind_turbine_inventory = "sacchi_mass_model"           #level 1
 ```python
 #Depending on the level selected, change the value of the variables in the dedicated section (except in level 1)
 
-if tower_wind_turbine_inventory=="sacchi_mass_model":
+if tower_wind_turbine_inventory=="mass_model":
     # level 1: Calculation of the total mass of the tower based on Sacchi tower/rotor/nacelle mass model
     mass_tower_tot_kg=mass_tower_calc_kg
     
@@ -697,10 +669,10 @@ values_table(
 #### 4️⃣ Resizing the inventory
 
 ```python
-if tower_wind_turbine_inventory=="sacchi_mass_model":
+if tower_wind_turbine_inventory=="mass_model":
     #Level 1: Resized inventory : linear extrapolation based on the total mass of the tower
     tower_manufacturing_resized_1 = agb.newActivity(USER_DB,
-                       "manufacturing of the tower of one wind turbine - reference inventory is resized based on Sacchi's mass model",
+                       "manufacturing of the tower of one wind turbine - reference inventory is resized based on implemented mass model",
                        unit = "unit",
                        exchanges = {tower_manufacturing_ref:resizing_mass_tower                         
              })   
@@ -762,7 +734,7 @@ elif tower_wind_turbine_inventory=="custom":
 agb.printAct(tower_manufacturing)
 ```
 
-### Rotor
+### Rotor = only blades
 
 
 #### Reference inventory
@@ -792,53 +764,15 @@ ROTOR_BLADES_HEATING_MJ = 385875*KWH_TO_MJ/NUMBER_REF_TURBINE                   
 ```
 
 ```python
-#Reference data for the hub (part of rotor)
-
-#Mass of cast iron in the rotor's hub
-MASS_ROTOR_HUB_CAST_IRON_KG = 821156.25/NUMBER_REF_TURBINE                              #kg
-#Mass of chromium steel in the rotor's hub
-MASS_ROTOR_HUB_CHROMIUM_STEEL_KG = 479156.25/NUMBER_REF_TURBINE                          #kg
-#Mass of steel low alloyed in the rotor's hub
-MASS_ROTOR_HUB_STEEL_MIX_KG = 432843.75/NUMBER_REF_TURBINE                               #kg
-#Mass of glass fiber in the rotor's hub
-MASS_ROTOR_HUB_GLASS_FIBER_KG=49875/NUMBER_REF_TURBINE                                  #kg
-
-#Total mass of the rotor's hub
-MASS_ROTOR_HUB_TOT_KG=MASS_ROTOR_HUB_CAST_IRON_KG+MASS_ROTOR_HUB_CHROMIUM_STEEL_KG+MASS_ROTOR_HUB_STEEL_MIX_KG+MASS_ROTOR_HUB_GLASS_FIBER_KG
-
-#Amount of other flows
-ROTOR_HUB_ELECTRICITY_KWH = 2162437.5/NUMBER_REF_TURBINE                           #kWh
-ROTOR_HUB_NATURAL_GAS_M3 = (890625/GAS_ENERGY_PER_VOLUME)/NUMBER_REF_TURBINE       #m3
-ROTOR_HUB_WATER_KG = 778406.25/NUMBER_REF_TURBINE                                   #kg
-ROTOR_HUB_SAND_KG = 7125000/NUMBER_REF_TURBINE                                      #kg
-
-```
-
-```python
-#Masses in the rotor 
-MASS_ROTOR_GLASS_FIBER_KG=MASS_ROTOR_BLADES_GLASS_FIBER_KG+MASS_ROTOR_HUB_GLASS_FIBER_KG
-MASS_ROTOR_EPOXY_KG=MASS_ROTOR_BLADES_EPOXY_KG
-MASS_ROTOR_WOOD_MIX_KG=MASS_ROTOR_BLADES_WOOD_MIX_KG
-MASS_ROTOR_POLYPROPYLENE_KG=MASS_ROTOR_BLADES_POLYPROPYLENE_KG
-MASS_ROTOR_CAST_IRON_KG=MASS_ROTOR_HUB_CAST_IRON_KG
-MASS_ROTOR_CHROMIUM_STEEL_KG=MASS_ROTOR_HUB_CHROMIUM_STEEL_KG
-MASS_ROTOR_STEEL_MIX_KG=MASS_ROTOR_HUB_STEEL_MIX_KG
-#Total mass of the rotor
-MASS_ROTOR_TOT_KG=MASS_ROTOR_GLASS_FIBER_KG+MASS_ROTOR_EPOXY_KG+MASS_ROTOR_WOOD_MIX_KG+MASS_ROTOR_POLYPROPYLENE_KG+MASS_ROTOR_CAST_IRON_KG+MASS_ROTOR_CHROMIUM_STEEL_KG+MASS_ROTOR_STEEL_MIX_KG
-```
-
-```python
 #Print a table with the masses of materials of the reference rotor
 #function values_table is defined in "utils"
 
 values_table(
-    MASS_ROTOR_TOT_KG=(MASS_ROTOR_TOT_KG,"kg"),
-    MASS_ROTOR_EPOXY_KG=(MASS_ROTOR_GLASS_FIBER_KG, "kg"),
-    MASS_ROTOR_WOOD_MIX_KG=(MASS_ROTOR_WOOD_MIX_KG, "kg"),
-    MASS_ROTOR_POLYPROPYLENE_KG=(MASS_ROTOR_POLYPROPYLENE_KG, "kg"),
-    MASS_ROTOR_CAST_IRON_KG=(MASS_ROTOR_CAST_IRON_KG, "kg"),
-    MASS_ROTOR_CHROMIUM_STEEL_KG=(MASS_ROTOR_CHROMIUM_STEEL_KG, "kg"),
-    MASS_ROTOR_STEEL_MIX_KG=(MASS_ROTOR_STEEL_MIX_KG, "kg"))
+    MASS_ROTOR_BLADES_TOT_KG=(MASS_ROTOR_BLADES_TOT_KG,"kg"),
+    MASS_ROTOR_BLADES_GLASS_FIBER_KG=(MASS_ROTOR_BLADES_GLASS_FIBER_KG, "kg"),
+    MASS_ROTOR_BLADES_EPOXY_KG=(MASS_ROTOR_BLADES_EPOXY_KG, "kg"),
+    MASS_ROTOR_BLADES_WOOD_MIX_KG=(MASS_ROTOR_BLADES_WOOD_MIX_KG, "kg"),
+    MASS_ROTOR_BLADES_POLYPROPYLENE_KG=(MASS_ROTOR_BLADES_POLYPROPYLENE_KG, "kg"))
 ```
 
 ```python
@@ -861,49 +795,26 @@ rotor_blades_manufacturing_ref = agb.newActivity(USER_DB,
 
              })
 
-#We define the reference rotor hub manufacturing inventory based on data provided by Kouloumpis and Azapagic, 2022
-rotor_hub_manufacturing_ref = agb.newActivity(USER_DB,
-                       "manufacturing of the rotor's hub of one 5 MW reference turbine' ",
-                       unit = "unit",                       
-                       phase = PHASE_1_MANUFACTURING,
-                       system_2= ROTOR,
-                       exchanges = {
-                           cast_iron: MASS_ROTOR_HUB_CAST_IRON_KG,
-                           chromium_steel: MASS_ROTOR_HUB_CHROMIUM_STEEL_KG,
-                           steel_low_alloyed_mix: MASS_ROTOR_HUB_STEEL_MIX_KG,
-                           glass_fibre:MASS_ROTOR_HUB_GLASS_FIBER_KG,
-                           
-                           electricity_UCTE:ROTOR_HUB_ELECTRICITY_KWH,
-                           natural_gas:ROTOR_HUB_NATURAL_GAS_M3,
-                           water:ROTOR_HUB_WATER_KG,
-                           sand: ROTOR_HUB_SAND_KG,
-                        
-             })
-
 #We define the reference rotor manufacturing inventory based on data provided by Kouloumpis and Azapagic, 2022
 rotor_manufacturing_ref = agb.newActivity(USER_DB,
-                       "manufacturing of the rotor of one 5 MW reference turbine' ",
-                       unit = "unit", 
+                       "manufacturing of the rotor of one 5 MW reference turbine",
+                       unit = "unit",
                        exchanges = {
                            rotor_blades_manufacturing_ref:1,
-                           rotor_hub_manufacturing_ref:1,
 
              })
 
 #Print the reference inventories
 agb.printAct(rotor_blades_manufacturing_ref)
-agb.printAct(rotor_hub_manufacturing_ref)
-agb.printAct(rotor_manufacturing_ref)
 ```
 
 ```python
 # Explore the climate change impacts of the reference inventories 
 agb.exploreImpacts(impacts_EF_CO2[0], rotor_blades_manufacturing_ref)
-agb.exploreImpacts(impacts_EF_CO2[0], rotor_hub_manufacturing_ref)
 ```
 
 ####  2️⃣ 3️⃣ 4️⃣ Resizing masses
- 1️⃣ wind_turbine_inventory = "sacchi_mass_model" > If you only know the power capacity of the turbine, you have nothing to do, the masses are calculated based on Sacchi's mass model
+ 1️⃣ wind_turbine_inventory = "mass_model" > If you only know the power capacity of the turbine, you have nothing to do, the masses are calculated based on implemented mass model
  
  2️⃣ wind_turbine_inventory = "user_mass_model" > If you know the aggregated masses of tower/rotor/nacelle, you can enter their values (or formula to calculate them)
  
@@ -912,40 +823,34 @@ agb.exploreImpacts(impacts_EF_CO2[0], rotor_hub_manufacturing_ref)
  4️⃣ wind_turbine_inventory = "custom" > If you get the whole inventory of the wind turbine, you can enter the bill of materials in this section and the whole inventory in the next section. Warning ! if you change material masses values, it shall be done using material masses variables (ex: mass_tower_steel_kg) as these mass values are reused in other parts of the model (eg for transport, maintenance, end of life)
 
 ```python
-rotor_wind_turbine_inventory = "sacchi_mass_model"           #level 1
+rotor_wind_turbine_inventory = "mass_model"           #level 1
 #rotor_wind_turbine_inventory = "user_mass_model"            #level 2
 #rotor_wind_turbine_inventory = "bill_of_materials"          #Level 3
 #rotor_wind_turbine_inventory = "custom"                     #Level 4
 ```
 
 ```python
-if rotor_wind_turbine_inventory=="sacchi_mass_model":
-    # Level 1: Calculation of the total mass of the rotor based on Sacchi tower/rotor/nacelle mass model
+if rotor_wind_turbine_inventory=="mass_model":
+    # Level 1: Calculation of the total mass of the rotor based on implemented tower/rotor/nacelle mass model
     mass_rotor_tot_kg=mass_rotor_calc_kg
     
     #Automatic calculation : we assume material ratios in the rotor are the same as in the reference inventory 
-    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_TOT_KG
-    mass_rotor_glass_fiber_kg=MASS_ROTOR_GLASS_FIBER_KG*resizing_mass_rotor
-    mass_rotor_epoxy_kg=MASS_ROTOR_EPOXY_KG*resizing_mass_rotor
-    mass_rotor_wood_mix_kg=MASS_ROTOR_WOOD_MIX_KG*resizing_mass_rotor
-    mass_rotor_polypropylene_kg=MASS_ROTOR_POLYPROPYLENE_KG*resizing_mass_rotor
-    mass_rotor_cast_iron_kg=MASS_ROTOR_CAST_IRON_KG*resizing_mass_rotor
-    mass_rotor_chromium_steel_kg=MASS_ROTOR_CHROMIUM_STEEL_KG*resizing_mass_rotor
-    mass_rotor_steel_mix_kg=MASS_ROTOR_STEEL_MIX_KG*resizing_mass_rotor
-    
+    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_BLADES_TOT_KG
+    mass_rotor_glass_fiber_kg=MASS_ROTOR_BLADES_GLASS_FIBER_KG*resizing_mass_rotor
+    mass_rotor_epoxy_kg=MASS_ROTOR_BLADES_EPOXY_KG*resizing_mass_rotor
+    mass_rotor_wood_mix_kg=MASS_ROTOR_BLADES_WOOD_MIX_KG*resizing_mass_rotor
+    mass_rotor_polypropylene_kg=MASS_ROTOR_BLADES_POLYPROPYLENE_KG*resizing_mass_rotor
+
 elif rotor_wind_turbine_inventory=="user_mass_model":
     # Level 2 : Calculation of the total mass of the rotor based on user mass model (formula or given value )
     mass_rotor_tot_kg=0
     
     #Automatic calculation : we assume material ratios in the rotor are the same as in the reference inventory 
-    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_TOT_KG
-    mass_rotor_glass_fiber_kg=MASS_ROTOR_GLASS_FIBER_KG*resizing_mass_rotor
-    mass_rotor_epoxy_kg=MASS_ROTOR_EPOXY_KG*resizing_mass_rotor
-    mass_rotor_wood_mix_kg=MASS_ROTOR_WOOD_MIX_KG*resizing_mass_rotor
-    mass_rotor_polypropylene_kg=MASS_ROTOR_POLYPROPYLENE_KG*resizing_mass_rotor
-    mass_rotor_cast_iron_kg=MASS_ROTOR_CAST_IRON_KG*resizing_mass_rotor
-    mass_rotor_chromium_steel_kg=MASS_ROTOR_CHROMIUM_STEEL_KG*resizing_mass_rotor
-    mass_rotor_steel_mix_kg=MASS_ROTOR_STEEL_MIX_KG*resizing_mass_rotor
+    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_BLADES_TOT_KG
+    mass_rotor_glass_fiber_kg=MASS_ROTOR_BLADES_GLASS_FIBER_KG*resizing_mass_rotor
+    mass_rotor_epoxy_kg=MASS_ROTOR_BLADES_EPOXY_KG*resizing_mass_rotor
+    mass_rotor_wood_mix_kg=MASS_ROTOR_BLADES_WOOD_MIX_KG*resizing_mass_rotor
+    mass_rotor_polypropylene_kg=MASS_ROTOR_BLADES_POLYPROPYLENE_KG*resizing_mass_rotor
     
     
 elif rotor_wind_turbine_inventory=="bill_of_materials":
@@ -954,14 +859,10 @@ elif rotor_wind_turbine_inventory=="bill_of_materials":
     mass_rotor_epoxy_kg=0 #kg
     mass_rotor_wood_mix_kg=0 #kg
     mass_rotor_polypropylene_kg=0 #kg
-    mass_rotor_cast_iron_kg=0 #kg
-    mass_rotor_chromium_steel_kg=0 #kg
-    mass_rotor_steel_mix_kg=0 #kg
     
     #Automatic calculation of the total mass
-    mass_rotor_tot_kg=mass_rotor_glass_fiber_kg+mass_rotor_epoxy_kg+mass_rotor_wood_mix_kg+mass_rotor_polypropylene_kg+mass_rotor_cast_iron_kg+mass_rotor_cast_iron_kg+mass_rotor_chromium_steel_kg+mass_rotor_steel_mix_kg
-    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_TOT_KG
-
+    mass_rotor_tot_kg=mass_rotor_glass_fiber_kg+mass_rotor_epoxy_kg+mass_rotor_wood_mix_kg+mass_rotor_polypropylene_kg
+    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_BLADES_TOT_KG
     
 elif rotor_wind_turbine_inventory=="custom":
     #Level 4 : if you have the whole inventory of the wind turbine,  enter the value of the masses (and you will enter the new inventory in the next section)
@@ -969,13 +870,10 @@ elif rotor_wind_turbine_inventory=="custom":
     mass_rotor_epoxy_kg=0 #kg
     mass_rotor_wood_mix_kg=0 #kg
     mass_rotor_polypropylene_kg=0 #kg
-    mass_rotor_cast_iron_kg=0 #kg
-    mass_rotor_chromium_steel_kg=0 #kg
-    mass_rotor_steel_mix_kg=0 #kg
     
     #Automatic calculation of the total mass
-    mass_rotor_tot_kg=mass_rotor_glass_fiber_kg+mass_rotor_epoxy_kg+mass_rotor_wood_mix_kg+mass_rotor_polypropylene_kg+mass_rotor_cast_iron_kg+mass_rotor_cast_iron_kg+mass_rotor_chromium_steel_kg+mass_rotor_steel_mix_kg
-    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_TOT_KG
+    mass_rotor_tot_kg=mass_rotor_glass_fiber_kg+mass_rotor_epoxy_kg+mass_rotor_wood_mix_kg+mass_rotor_polypropylene_kg
+    resizing_mass_rotor=mass_rotor_tot_kg/MASS_ROTOR_BLADES_TOT_KG
 
 ```
 
@@ -988,19 +886,16 @@ values_table(
     mass_rotor_glass_fiber_kg=(mass_rotor_glass_fiber_kg, "kg"),
     mass_rotor_epoxy_kg=(mass_rotor_glass_fiber_kg, "kg"),
     mass_rotor_wood_mix_kg=(mass_rotor_wood_mix_kg, "kg"),
-    mass_rotor_polypropylene_kg=(mass_rotor_polypropylene_kg, "kg"),
-    mass_rotor_cast_iron_kg=(mass_rotor_cast_iron_kg, "kg"),
-    mass_rotor_chromium_steel_kg=(mass_rotor_chromium_steel_kg, "kg"),
-    mass_rotor_steel_mix_kg=(mass_rotor_steel_mix_kg, "kg"))
+    mass_rotor_polypropylene_kg=(mass_rotor_polypropylene_kg, "kg"))
 ```
 
 #### 4️⃣ Resizing the inventory
 
 ```python
-if rotor_wind_turbine_inventory=="sacchi_mass_model":
+if rotor_wind_turbine_inventory=="mass_model":
     #Level 1: Resized inventory : linear extrapolation based on the total mass of the rotor
     rotor_manufacturing_resized_1 = agb.newActivity(USER_DB,
-                       "manufacturing of the rotor of one wind turbine - reference inventory is resized based on Sacchi's mass model",
+                       "manufacturing of the rotor of one wind turbine - reference inventory is resized based on implemented mass model",
                        unit = "unit",
                        exchanges = {rotor_manufacturing_ref:resizing_mass_rotor                          
              })
@@ -1028,15 +923,11 @@ elif rotor_wind_turbine_inventory=="bill_of_materials":
                            epoxy: mass_rotor_epoxy_kg,
                            wood_mix: mass_rotor_wood_mix_kg/DENSITY_PINEWOOD, 
                            polypropylene: mass_rotor_polypropylene_kg,
-                           cast_iron: mass_rotor_cast_iron_kg,
-                           chromium_steel: mass_rotor_chromium_steel_kg,
-                           steel_low_alloyed_mix:mass_rotor_steel_mix_kg,                           
                            
-                           water: resizing_mass_rotor*(ROTOR_BLADES_WATER_KG+ROTOR_HUB_WATER_KG),
-                           natural_gas: resizing_mass_rotor*(ROTOR_BLADES_NATURAL_GAS_M3+ROTOR_HUB_NATURAL_GAS_M3),
-                           electricity_UCTE:resizing_mass_rotor*(ROTOR_BLADES_ELECTRICITY_kWH+ROTOR_HUB_ELECTRICITY_KWH),
+                           water: resizing_mass_rotor*(ROTOR_BLADES_WATER_KG), 
+                           natural_gas: resizing_mass_rotor*(ROTOR_BLADES_NATURAL_GAS_M3), 
+                           electricity_UCTE:resizing_mass_rotor*(ROTOR_BLADES_ELECTRICITY_kWH),
                            district_heating: resizing_mass_rotor*ROTOR_BLADES_HEATING_MJ,
-                           sand: resizing_mass_rotor*ROTOR_HUB_SAND_KG,
               })
                            
     rotor_manufacturing = rotor_manufacturing_resized_3
@@ -1056,13 +947,10 @@ elif rotor_wind_turbine_inventory=="custom":
                        phase = PHASE_1_MANUFACTURING,
                        system_2=ROTOR,
                        exchanges = {
-                           lass_fibre:mass_rotor_glass_fiber_kg,
+                           glass_fibre:mass_rotor_glass_fiber_kg,
                            epoxy: mass_rotor_epoxy_kg,
                            wood_mix: mass_rotor_wood_mix_kg/DENSITY_PINEWOOD, 
-                           polypropylene: mass_rotor_polypropylene_kg,
-                           cast_iron: mass_rotor_cast_iron_kg,
-                           chromium_steel: mass_rotor_chromium_steel_kg,
-                           steel_low_alloyed_mix:mass_rotor_steel_mix_kg,                                                
+                           polypropylene: mass_rotor_polypropylene_kg,                                            
                            #add flows,
              })
     rotor_manufacturing = rotor_manufacturing_custom
@@ -1074,6 +962,29 @@ agb.printAct(rotor_manufacturing)
 
 
 #### Reference inventory
+
+```python
+#Reference data for the hub (part of nacelle)
+
+#Mass of cast iron in the rotor's hub
+MASS_HUB_CAST_IRON_KG = 821156.25/NUMBER_REF_TURBINE                              #kg
+#Mass of chromium steel in the rotor's hub
+MASS_HUB_CHROMIUM_STEEL_KG = 479156.25/NUMBER_REF_TURBINE                          #kg
+#Mass of steel low alloyed in the rotor's hub
+MASS_HUB_STEEL_MIX_KG = 432843.75/NUMBER_REF_TURBINE                               #kg
+#Mass of glass fiber in the rotor's hub
+MASS_HUB_GLASS_FIBER_KG=49875/NUMBER_REF_TURBINE                                  #kg
+
+#Total mass of the rotor's hub
+MASS_HUB_TOT_KG=MASS_HUB_CAST_IRON_KG+MASS_HUB_CHROMIUM_STEEL_KG+MASS_HUB_STEEL_MIX_KG+MASS_HUB_GLASS_FIBER_KG
+
+#Amount of other flows
+HUB_ELECTRICITY_KWH = 2162437.5/NUMBER_REF_TURBINE                           #kWh
+HUB_NATURAL_GAS_M3 = (890625/GAS_ENERGY_PER_VOLUME)/NUMBER_REF_TURBINE       #m3
+HUB_WATER_KG = 778406.25/NUMBER_REF_TURBINE                                   #kg
+HUB_SAND_KG = 7125000/NUMBER_REF_TURBINE                                      #kg
+
+```
 
 ```python
 #Reference data for the nacelle main body (NACELLE_MB)
@@ -1124,15 +1035,16 @@ NACELLE_PTU_STEEL_PROCESS_KG = MASS_NACELLE_PTU_STEEL_MIX_KG + MASS_NACELLE_PTU_
 
 ```python
 #Masses in the nacelle
-MASS_NACELLE_CAST_IRON_KG=MASS_NACELLE_MB_CAST_IRON_KG
-MASS_NACELLE_STEEL_MIX_KG=MASS_NACELLE_MB_STEEL_MIX_KG+MASS_NACELLE_PTU_STEEL_MIX_KG+MASS_NACELLE_MB_STEEL_ELECTRIC_KG+MASS_NACELLE_PTU_STEEL_ELECTRIC_KG
-MASS_NACELLE_CHROMIUM_STEEL_KG=MASS_NACELLE_MB_CHROMIUM_STEEL_KG
+MASS_NACELLE_CAST_IRON_KG=MASS_HUB_CAST_IRON_KG+MASS_NACELLE_MB_CAST_IRON_KG
+MASS_NACELLE_STEEL_MIX_KG=MASS_HUB_STEEL_MIX_KG+MASS_NACELLE_MB_STEEL_MIX_KG+MASS_NACELLE_PTU_STEEL_MIX_KG+MASS_NACELLE_MB_STEEL_ELECTRIC_KG+MASS_NACELLE_PTU_STEEL_ELECTRIC_KG
+MASS_NACELLE_CHROMIUM_STEEL_KG=MASS_HUB_CHROMIUM_STEEL_KG+MASS_NACELLE_MB_CHROMIUM_STEEL_KG
 MASS_NACELLE_COPPER_KG=MASS_NACELLE_MB_COPPER_KG+MASS_NACELLE_PTU_COPPER_KG
 MASS_NACELLE_ALUMINIUM_MIX_KG=MASS_NACELLE_MB_ALUMINIUM_MIX_KG+MASS_NACELLE_PTU_ALUMINIUM_MIX_KG
 MASS_NACELLE_POLYETHYLENE_KG=MASS_NACELLE_PTU_POLYETHYLENE_KG
+MASS_NACELLE_GLASS_FIBER_KG=MASS_HUB_GLASS_FIBER_KG
 
 #Total mass of the nacelle
-MASS_NACELLE_TOT_KG=MASS_NACELLE_CAST_IRON_KG+MASS_NACELLE_STEEL_MIX_KG+MASS_NACELLE_CHROMIUM_STEEL_KG+MASS_NACELLE_COPPER_KG+MASS_NACELLE_ALUMINIUM_MIX_KG+MASS_NACELLE_POLYETHYLENE_KG
+MASS_NACELLE_TOT_KG=MASS_NACELLE_CAST_IRON_KG+MASS_NACELLE_STEEL_MIX_KG+MASS_NACELLE_CHROMIUM_STEEL_KG+MASS_NACELLE_COPPER_KG+MASS_NACELLE_ALUMINIUM_MIX_KG+MASS_NACELLE_POLYETHYLENE_KG+MASS_NACELLE_GLASS_FIBER_KG
 ```
 
 ```python
@@ -1151,6 +1063,26 @@ values_table(
 ```
 
 ```python
+#We define the reference hub manufacturing inventory based on data provided by Kouloumpis and Azapagic, 2022
+nacelle_hub_manufacturing_ref = agb.newActivity(USER_DB,
+                       "manufacturing of the hub of one 5 MW reference turbine' ",
+                       unit = "unit",                       
+                       phase = PHASE_1_MANUFACTURING,
+                       system_2= NACELLE,
+                       exchanges = {
+                           cast_iron: MASS_HUB_CAST_IRON_KG,
+                           chromium_steel: MASS_HUB_CHROMIUM_STEEL_KG,
+                           steel_low_alloyed_mix: MASS_HUB_STEEL_MIX_KG,
+                           glass_fibre:MASS_HUB_GLASS_FIBER_KG,
+                           
+                           electricity_UCTE:HUB_ELECTRICITY_KWH,
+                           natural_gas:HUB_NATURAL_GAS_M3,
+                           water:HUB_WATER_KG,
+                           sand: HUB_SAND_KG,
+                        
+             })
+
+
 #We define the reference nacelle main body manufacturing inventory based on data provided by Kouloumpis and Azapagic, 2022
 nacelle_main_body_manufacturing_ref = agb.newActivity(USER_DB,
                        "manufacturing of the nacelle main body of one 5 MW reference turbine' ",
@@ -1190,24 +1122,27 @@ nacelle_manufacturing_ref = agb.newActivity(USER_DB,
                        "manufacturing of the nacelle of one 5 MW reference turbine' ",
                        unit = "unit", 
                        exchanges = {
+                           nacelle_hub_manufacturing_ref:1,
                            nacelle_main_body_manufacturing_ref:1,
                            nacelle_ptu_manufacturing_ref:1,
 
              })
 
 #Print the reference inventories
+agb.printAct(nacelle_hub_manufacturing_ref)
 agb.printAct(nacelle_main_body_manufacturing_ref)
 agb.printAct(nacelle_ptu_manufacturing_ref)
 ```
 
 ```python
 # Explore the climate change impacts of the reference inventories 
-agb.exploreImpacts(impacts_EF_CO2[0], rotor_blades_manufacturing_ref)
-agb.exploreImpacts(impacts_EF_CO2[0], rotor_hub_manufacturing_ref)
+agb.exploreImpacts(impacts_EF_CO2[0], nacelle_hub_manufacturing_ref)
+agb.exploreImpacts(impacts_EF_CO2[0], nacelle_main_body_manufacturing_ref)
+agb.exploreImpacts(impacts_EF_CO2[0], nacelle_ptu_manufacturing_ref)
 ```
 
 ####  2️⃣ 3️⃣ 4️⃣ Resizing masses
- 1️⃣ wind_turbine_inventory = "sacchi_mass_model" > If you only know the power capacity of the turbine, you have nothing to do, the masses are calculated based on Sacchi's mass model
+ 1️⃣ wind_turbine_inventory = "mass_model" > If you only know the power capacity of the turbine, you have nothing to do, the masses are calculated based on implemented mass model
  
  2️⃣ wind_turbine_inventory = "user_mass_model" > If you know the aggregated masses of tower/rotor/nacelle, you can enter their values (or formula to calculate them)
  
@@ -1216,15 +1151,15 @@ agb.exploreImpacts(impacts_EF_CO2[0], rotor_hub_manufacturing_ref)
  4️⃣ wind_turbine_inventory = "custom" > If you get the whole inventory of the wind turbine, you can enter the bill of materials in this section and the whole inventory in the next section. Warning ! if you change material masses values, it shall be done using material masses variables (ex: mass_tower_steel_kg) as these mass values are reused in other parts of the model (eg for transport, maintenance, end of life)
 
 ```python
-nacelle_wind_turbine_inventory = "sacchi_mass_model"           #level 1
+nacelle_wind_turbine_inventory = "mass_model"           #level 1
 #nacelle_wind_turbine_inventory = "user_mass_model"            #level 2
 #nacelle_wind_turbine_inventory = "bill_of_materials"          #Level 3
 #nacelle_wind_turbine_inventory = "custom"                     #Level 4
 ```
 
 ```python
-if nacelle_wind_turbine_inventory=="sacchi_mass_model":
-    # Level 1: Calculation of the total mass of the nacelle based on Sacchi tower/rotor/nacelle mass model
+if nacelle_wind_turbine_inventory=="mass_model":
+    # Level 1: Calculation of the total mass of the nacelle based on implemented tower/rotor/nacelle mass model
     mass_nacelle_tot_kg=mass_nacelle_calc_kg
     
     #Automatic calculation : we assume material ratios in the nacelle are the same as in the reference inventory 
@@ -1235,7 +1170,8 @@ if nacelle_wind_turbine_inventory=="sacchi_mass_model":
     mass_nacelle_copper_kg=MASS_NACELLE_COPPER_KG*resizing_mass_nacelle
     mass_nacelle_aluminium_mix_kg=MASS_NACELLE_ALUMINIUM_MIX_KG*resizing_mass_nacelle
     mass_nacelle_polyethylene_kg=MASS_NACELLE_POLYETHYLENE_KG*resizing_mass_nacelle
-
+    mass_nacelle_glass_fiber_kg=MASS_NACELLE_GLASS_FIBER_KG*resizing_mass_nacelle
+    
 elif nacelle_wind_turbine_inventory=="user_mass_model":
     # Level 2 : Calculation of the total mass of the nacelle based on user mass model (formula or given value )
     mass_nacelle_tot_kg=0
@@ -1248,7 +1184,7 @@ elif nacelle_wind_turbine_inventory=="user_mass_model":
     mass_nacelle_copper_kg=MASS_NACELLE_COPPER_KG*resizing_mass_nacelle
     mass_nacelle_aluminium_mix_kg=MASS_NACELLE_ALUMINIUM_MIX_KG*resizing_mass_nacelle
     mass_nacelle_polyethylene_kg=MASS_NACELLE_POLYETHYLENE_KG*resizing_mass_nacelle
-    
+    mass_nacelle_glass_fiber_kg=MASS_NACELLE_GLASS_FIBER_KG*resizing_mass_nacelle    
     
 elif nacelle_wind_turbine_inventory=="bill_of_materials":
     #Level 3 : if you have the masses of each material, enter the value of the masses
@@ -1265,9 +1201,10 @@ elif nacelle_wind_turbine_inventory=="bill_of_materials":
 
     mass_nacelle_aluminium_mix_kg=0 #kg
     mass_nacelle_polyethylene_kg=0 #kg
+    mass_nacelle_glass_fiber_kg=0 #kg
     
     #Automatic calculation of the total mass
-    mass_nacelle_tot_kg=mass_nacelle_cast_iron_kg+mass_nacelle_chromium_steel_kg+mass_nacelle_copper_kg+mass_nacelle_aluminium_mix_kg+mass_nacelle_polyethylene_kg
+    mass_nacelle_tot_kg=mass_nacelle_cast_iron_kg+mass_nacelle_chromium_steel_kg+mass_nacelle_copper_kg+mass_nacelle_aluminium_mix_kg+mass_nacelle_polyethylene_kg+mass_nacelle_glass_fiber_kg
     resizing_mass_nacelle=mass_nacelle_tot_kg/MASS_NACELLE_TOT_KG
     
 elif nacelle_wind_turbine_inventory=="custom":
@@ -1285,9 +1222,11 @@ elif nacelle_wind_turbine_inventory=="custom":
 
     mass_nacelle_aluminium_mix_kg=0 #kg
     mass_nacelle_polyethylene_kg=0 #kg
-    
+    mass_nacelle_glass_fiber_kg=0 #kg
+    #add flows
+
     #Automatic calculation of the total mass
-    mass_nacelle_tot_kg=mass_nacelle_cast_iron_kg+mass_nacelle_chromium_steel_kg+mass_nacelle_copper_kg+mass_nacelle_aluminium_mix_kg+mass_nacelle_polyethylene_kg
+    mass_nacelle_tot_kg=mass_nacelle_cast_iron_kg+mass_nacelle_chromium_steel_kg+mass_nacelle_copper_kg+mass_nacelle_aluminium_mix_kg+mass_nacelle_polyethylene_kg+mass_nacelle_glass_fiber_kg
     resizing_mass_nacelle=mass_nacelle_tot_kg/MASS_NACELLE_TOT_KG
 
 ```
@@ -1303,17 +1242,18 @@ values_table(
    mass_nacelle_chromium_steel_kg=(mass_nacelle_chromium_steel_kg, "kg"),
    mass_nacelle_copper_kg=(mass_nacelle_copper_kg, "kg"),
    mass_nacelle_aluminium_mix_kg=(mass_nacelle_aluminium_mix_kg, "kg"),
-   mass_nacelle_polyethylene_kg=(mass_nacelle_polyethylene_kg, "kg"))
+   mass_nacelle_polyethylene_kg=(mass_nacelle_polyethylene_kg, "kg"),
+   mass_nacelle_glass_fiber_kg=(mass_nacelle_glass_fiber_kg,"kg"))
 
 ```
 
 #### 4️⃣ Resizing the inventory
 
 ```python
-if nacelle_wind_turbine_inventory=="sacchi_mass_model":
+if nacelle_wind_turbine_inventory=="mass_model":
     # Level 1: Resized inventory : linear extrapolation based on the total mass of the nacelle
     nacelle_manufacturing_resized_1 = agb.newActivity(USER_DB,
-                       "manufacturing of the nacelle of one wind turbine - reference inventory is resized based on Sacchi's mass model",
+                       "manufacturing of the nacelle of one wind turbine - reference inventory is resized based on implemented mass model",
                        unit = "unit",
                        exchanges = {nacelle_manufacturing_ref:resizing_mass_nacelle                        
              })
@@ -1346,11 +1286,13 @@ elif nacelle_wind_turbine_inventory=="bill_of_materials":
                            
                            copper_process: mass_nacelle_ptu_copper_kg,
                            steel_process: mass_nacelle_ptu_steel_mix_kg,
-
-                           electricity_UCTE: resizing_mass_nacelle*NACELLE_MB_ELECTRICITY_UCTE_KWH,
-                           natural_gas: resizing_mass_nacelle*NACELLE_MB_NATURAL_GAS_MJ,
-              })
                            
+                           water: resizing_mass_nacelle*HUB_WATER_KG,
+                           electricity_UCTE: resizing_mass_nacelle*(NACELLE_MB_ELECTRICITY_UCTE_KWH+HUB_ELECTRICITY_KWH),
+                           natural_gas: resizing_mass_nacelle*(NACELLE_MB_NATURAL_GAS_MJ+HUB_NATURAL_GAS_M3),
+                           sand: resizing_mass_rotor*HUB_SAND_KG,
+
+              })                           
     nacelle_manufacturing = nacelle_manufacturing_resized_3
     
 elif nacelle_wind_turbine_inventory=="custom":
@@ -1404,7 +1346,7 @@ values_table(
 # We introduce an activity for one wind turbine that is composed of tower, rotor and nacelle
 
 one_wind_turbine_manufacturing = agb.newActivity(USER_DB,
-                       "manufacturing of one windturbine based on customized inventory",
+                       "manufacturing of one windturbine",
                        unit = "unit",
                        phase = PHASE_1_MANUFACTURING,
                        system_1 = WIND_TURBINES,  
@@ -1669,7 +1611,7 @@ foundations_inventory = "automatised_mass_model"              #level 1
 emerged_height_m=20 #m
 
 #We assume the mass one pile for jacket foundations is constant equal to : 
-mass_pile_jacket_kg=80000 #kg 
+mass_pile_jacket_kg=62000 #kg 
 ```
 
 ```python
@@ -1913,6 +1855,8 @@ one_foundation_tripod_manufacturing = agb.newActivity(USER_DB,
 one_foundation_jacket_manufacturing = agb.newActivity(USER_DB,
                        "manufacturing of the jacket foundations of one wind turbine",
                        unit = "unit",
+                       system_1=WT_FOUNDATIONS,
+                       phase=PHASE_1_MANUFACTURING,
                        exchanges = {
                            steel_low_alloyed_mix: mass_foundation_jacket_steel_mix_kg,
                            steel_process: mass_foundation_jacket_steel_mix_kg,                           
@@ -1927,6 +1871,8 @@ one_foundation_spar_manufacturing = agb.newActivity(USER_DB,
 one_foundation_semisub_manufacturing = agb.newActivity(USER_DB,
                        "manufacturing of the semi submersible foundations of one wind turbine",
                        unit = "unit",
+                       system_1=WT_FOUNDATIONS,
+                       phase=PHASE_1_MANUFACTURING,
                        exchanges = {
                            steel_low_alloyed_mix: mass_foundation_semisub_steel_mix_kg,
                            steel_process: mass_foundation_semisub_steel_mix_kg,                           
@@ -3029,7 +2975,9 @@ values_table(
     mass_foundations_gbf_tot_kg=(mass_foundations_gbf_tot_kg,"kg"),
     mass_foundations_tripod_tot_kg=(mass_foundations_tripod_tot_kg,"kg"),
     mass_foundations_monopile_tot_kg=(mass_foundations_monopile_tot_kg, "kg"),
+    mass_foundations_jacket_tot_kg=(mass_foundations_tripod_tot_kg, "kg"),
     mass_foundations_spar_tot_kg=(mass_foundations_spar_tot_kg, "kg"),
+    mass_foundations_semisub_tot_kg=(mass_foundations_semisub_tot_kg, "kg"),
     mass_foundations_custom_tot_kg=(mass_foundations_custom_tot_kg,"kg"),
     
 )
@@ -3042,7 +2990,9 @@ mass_wind_turbines_tot_kg=mass_one_wind_turbine_tot_kg*n_turbines
 mass_foundations_gbf_tot_farm_kg=mass_foundations_gbf_tot_kg*n_turbines
 mass_foundations_tripod_tot_farm_kg=mass_foundations_tripod_tot_kg*n_turbines
 mass_foundations_monopile_tot_farm_kg=mass_foundations_monopile_tot_kg*n_turbines
+mass_foundations_jacket_tot_farm_kg=mass_foundations_jacket_tot_kg*n_turbines
 mass_foundations_spar_tot_farm_kg=mass_foundations_spar_tot_kg*n_turbines
+mass_foundations_semisub_tot_farm_kg=mass_foundations_semisub_tot_kg*n_turbines
 mass_foundations_custom_tot_farm_kg=mass_foundations_custom_tot_kg*n_turbines
 
 values_table(
@@ -3050,7 +3000,9 @@ values_table(
     mass_foundations_gbf_tot_farm_kg=(mass_foundations_gbf_tot_farm_kg,"kg"),
     mass_foundations_tripod_tot_farm_kg=(mass_foundations_tripod_tot_farm_kg,"kg"),
     mass_foundations_monopile_tot_farm_kg=(mass_foundations_monopile_tot_farm_kg, "kg"),
+    mass_foundations_jacket_tot_farm_kg=(mass_foundations_jacket_tot_farm_kg, "kg"),
     mass_foundations_spar_tot_farm_kg=(mass_foundations_spar_tot_farm_kg, "kg"),
+    mass_foundations_semisub_tot_farm_kg=(mass_foundations_semisub_tot_farm_kg, "kg"),
     mass_foundations_custom_tot_farm_kg=(mass_foundations_custom_tot_farm_kg,"kg"),
     mass_intcables_alu_tot_kg=(mass_intcables_alu_tot_kg,"kg"),
     mass_expcables_tot_kg=(mass_expcables_tot_kg,"kg"),
@@ -3713,10 +3665,7 @@ one_rotor_endoflife = agb.newActivity(USER_DB,
                           unit = 'unit',
                            phase = PHASE_6_EOL,
                            system_2 = ROTOR,
-                          exchanges = {
-                              landfill_steel:(1-steel_recycled_share_OUT)* (mass_rotor_steel_mix_kg+mass_rotor_cast_iron_kg+mass_rotor_chromium_steel_kg),
-                              #steel_recycled: steel_recycled_share_OUT * (mass_rotor_steel_mix_kg+mass_rotor_cast_iron_kg+mass_rotor_chromium_steel_kg),
-                              
+                          exchanges = {                            
                               landfill_glassfibre:mass_rotor_glass_fiber_kg,
                               landfill_epoxy:mass_rotor_epoxy_kg,
                               landfill_wood:mass_rotor_wood_mix_kg,
@@ -3745,7 +3694,9 @@ one_nacelle_endoflife = agb.newActivity(USER_DB,
                                 incineration_aluminium:alu_incineration_share_correc*mass_nacelle_aluminium_mix_kg,
                                 #alu_recycled:alu_recycled_share_OUT_correc*mass_nacelle_aluminium_mix_kg,
                                 
-                                incineration_plastic:mass_nacelle_polyethylene_kg,         
+                                incineration_plastic:mass_nacelle_polyethylene_kg,  
+                                landfill_glassfibre:mass_nacelle_glass_fiber_kg,
+
                             })
 agb.printAct(one_nacelle_endoflife)          
 ```
@@ -3826,7 +3777,6 @@ one_foundation_jacket_endoflife = agb.newActivity(USER_DB,
                                    system_1 = WT_FOUNDATIONS,
                                    exchanges = {
                                        landfill_steel:(1-steel_recycled_share_OUT)* mass_foundation_jacket_steel_mix_kg,
-                                       #steel_recycled:*steel_recycled_share_OUT* mass_foundation_tripod_steel_mix_kg,
                                        })
 
 ```
@@ -4808,13 +4758,13 @@ compute_impacts(
 ```
 
 <!-- #region -->
-# Export to excel 
+## Export to excel 
 
 
 It is possible to export to csv using [df.to_csv](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_csv.html) but it is not possible to our knowledge to export several sheets in one file using csv. This is why we did the import in Excel even if it is not an open source software. 
 <!-- #endregion -->
 
-## Helping section for export 
+### Helping section for export 
 
 ```python
 # Generate and name the tables you want to export
@@ -4855,7 +4805,7 @@ list_df_to_export=[
 export_data_to_excel(list_df_to_export,xlsx_file_name)
 ```
 
-## Customised export of results to excel
+### Customised export of results to excel
 
 ```python
 parameters=list_parameters_as_df()
