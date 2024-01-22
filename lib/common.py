@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict
-from sympy import Expr, Float, parse_expr, lambdify
+from sympy import Expr, Float, parse_expr, lambdify, Basic
 import json
 from typing import Literal, List
 
@@ -9,6 +9,8 @@ class ParamType(str, Enum) :
     ENUM = "enum"
     FLOAT = "float"
 
+def is_expr(exp):
+    return isinstance(exp, Basic)
 
 class FunctionalUnit :
 
@@ -39,6 +41,8 @@ class Lambda:
             # First, gather all expanded parameters
             all_expanded_params = set()
             for key, sub_expr in expr.items():
+                if not is_expr(sub_expr) :
+                    continue
                 expanded_params = list(str(symbol) for symbol in sub_expr.free_symbols)
                 all_expanded_params.update(expanded_params)
 

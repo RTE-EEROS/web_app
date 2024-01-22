@@ -5,16 +5,25 @@ from lca_algebraic.base_utils import _method_unit
 from lca_algebraic.lca import _preMultiLCAAlgebric
 from lca_algebraic.params import _param_registry
 from lca_algebraic.stats import _round_expr
-from lib.common import FunctionalUnit, Lambda, Impact, Model, Param
+
+from lib.common import FunctionalUnit, Lambda, Impact, Model, Param, is_expr, ParamType
 
 
 def round_expr(exp_or_dict, num_digits):
     if isinstance(exp_or_dict, dict) :
-        return dict({key: _round_expr(val, num_digits) for key, val in exp_or_dict.items()})
+        return dict({key: (val if not is_expr(val) else _round_expr(val, num_digits)) for key, val in exp_or_dict.items()})
     else:
         return _round_expr(exp_or_dict, num_digits)
 
+
 def paramDef_to_param(paramDef:ParamDef):
+
+    print(f"Param : {paramDef.name} : [{paramDef.min}-{paramDef.max}]")
+    if paramDef.type == ParamType.FLOAT and (paramDef.min is None or paramDef.max is None) :
+        raise Exception(f"Param of type float '{paramDef.name} 'should have both min and max")
+
+
+
     return Param(
         name=paramDef.name,
         type=paramDef.type,

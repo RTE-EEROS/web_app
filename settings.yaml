@@ -1,8 +1,8 @@
-title: Environmental Life cycle of off-shore wind farms
+title: EEROS
 icon: 🌬
-project: Parameterized_model_OWF_Original
-database: lif-owi
-root_activity: 'complete life cycle assessment model of a wind farm '
+project: EEROS_SETEC_Params
+database: Raccordement_DC_CM1
+root_activity: fabrication_et_pertes_electriques_liaison_entiere
 
 impacts:
   climate_change: ['EF v3.0','climate change','global warming potential (GWP100)']
@@ -14,16 +14,8 @@ impacts:
   land_use: ['EF v3.0', 'land use', 'soil quality index']
 
 functional_units:
-    energy:
-        formula: 8760000*availability*life_time*load_rate*n_turbines*turbine_MW*(1 - elec_losses)
-        unit: kWh
-
-    power:
-        formula: turbine_MW * n_turbines
-        unit: MW
-
     system:
         formula: 1
         unit:
 
-axes: ["system_1", "phase"]
+axes: ["system_1"]

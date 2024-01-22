@@ -2,7 +2,7 @@
 
 import streamlit as st
 from lib.common import Model
-from lib.app_utils import group_params, select_dict
+from lib.app_utils import group_params, select_dict, NullContextManager
 
 from lib.settings import settings, OUTFILE
 import plotly.express as px
@@ -66,7 +66,7 @@ def display_params(model):
     first_group = True
     for group_name, params in param_groups.items():
 
-        expander = st.expander(group_name, expanded=first_group) if group_name else None
+        expander = st.expander(group_name, expanded=first_group) if group_name else NullContextManager()
         first_group = False
 
         with expander :
@@ -97,7 +97,6 @@ def display_params(model):
                         index=default_index)
 
                 else:
-
                     param_values[param.name] = st.slider(
                         key=param.name,
                         label=param_label,
