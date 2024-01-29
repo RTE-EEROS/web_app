@@ -17,5 +17,9 @@ functional_units:
     system:
         formula: 1
         unit:
+    energydelivered:
+        formula: elec_delivree_MWh_par_an*duree_de_vie_liaison
+        unit: kWh      
 
-axes: ["system_1"]
+axes: ["system_1","phase"]
+
